@@ -4,36 +4,37 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
-public class App {
+public class App implements ActionListener {
+    private JFrame frame;
+    private JPanel jokePanel;
+    private JLabel setup;
+    private JLabel delivery;
+    CustomHTTPClient client = new CustomHTTPClient();
 
     App() throws IOException {
-        CustomHTTPClient client = new CustomHTTPClient();
 
-        JFrame frame = new JFrame();
-        JLabel setup = new JLabel();
-        JLabel delivery = new JLabel();
+        frame = new JFrame();
 
-        JPanel jokePanel = new JPanel(new GridLayout(2,1));
+        JButton submit = new JButton("Tell me a Joke!");
+        submit.addActionListener(this);
+        setup = new JLabel("Empty");
+        delivery = new JLabel("Also empty");
 
-        try{
-            JokeDTO dto = formatJoke(getJoke(client.URL));
-            setup.setText(dto.getSetup());
-            delivery.setText(dto.getDelivery());
-        }catch(InvalidTypeIdException e){
-            e.printStackTrace();
-        }
-
+        jokePanel = new JPanel(new GridLayout(0,1));
+        jokePanel.setBorder(BorderFactory.createEmptyBorder(500, 500, 500, 500));
         jokePanel.add(setup);
         jokePanel.add(delivery);
+        jokePanel.add(submit);
+        jokePanel.setBackground(Color.CYAN);
 
-        frame.setTitle("Joke Of The Day!");
-        frame.setSize(700, 700);
+        frame.add(jokePanel, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(jokePanel);
-
-        frame.getContentPane().setBackground(new Color(255,105,180));
+        frame.setTitle("Joke Of The Day!");
+        frame.pack();
 
         frame.setVisible(true);
     }
@@ -50,5 +51,17 @@ public class App {
         CustomHTTPClient client = new CustomHTTPClient();
 
         return client.sendGET(URL);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent clicked) {
+        try{
+            JokeDTO dto = formatJoke(getJoke(client.URL));
+            setup.setText(dto.getSetup());
+            delivery.setText(dto.getDelivery());
+        }catch(IOException error){
+            error.printStackTrace();
+        }
+
     }
 }
